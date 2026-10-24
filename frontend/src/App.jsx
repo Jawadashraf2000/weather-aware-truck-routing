@@ -32,22 +32,22 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
       {/* Top Navigation Bar */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-600 rounded-lg text-white">
-            <Truck className="w-6 h-6" />
+      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="p-2 bg-blue-600 rounded-lg text-white shrink-0">
+            <Truck className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <div>
-            <h1 className="text-lg font-bold">Weather-Aware Truck Routing</h1>
-            <p className="text-xs text-slate-400">Load & Forecast Risk Decision Engine</p>
+          <div className="min-w-0">
+            <h1 className="text-base sm:text-lg font-bold truncate">Weather-Aware Truck Routing</h1>
+            <p className="text-[11px] sm:text-xs text-slate-400">Load & Forecast Risk Decision Engine</p>
           </div>
         </div>
       </header>
 
       {/* Main Grid Content */}
-      <div className="flex-1 p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-73px)]">
+      <main className="flex-1 p-3 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 lg:h-[calc(100vh-73px)]">
         {/* Left Column: Inputs and Route Summaries */}
-        <div className="lg:col-span-4 flex flex-col gap-4 overflow-y-auto pr-1">
+        <div className="lg:col-span-4 flex flex-col gap-4 lg:overflow-y-auto lg:pr-1 min-w-0">
           <InputForm onSubmit={handleFormSubmit} loading={loading} />
 
           {error && (
@@ -74,8 +74,8 @@ export default function App() {
         </div>
 
         {/* Right Column: Map Visualization & Forecast Slider */}
-        <div className="lg:col-span-8 flex flex-col gap-4 relative h-full">
-          <div className="flex-1">
+        <div className="lg:col-span-8 flex flex-col gap-4 relative h-[510px] sm:h-[620px] lg:h-full min-w-0">
+          <div className="flex-1 min-h-0">
             <MapView
               routes={routes}
               selectedRouteId={selectedRouteId}
@@ -83,14 +83,14 @@ export default function App() {
             />
           </div>
 
-          <div className="absolute bottom-4 left-4 right-4 z-[1000]">
+          <div className="absolute bottom-2 sm:bottom-4 left-2 right-2 sm:left-4 sm:right-4 z-[1000]">
             <ForecastSlider
               hourOffset={forecastHourOffset}
               onChange={setForecastHourOffset}
             />
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

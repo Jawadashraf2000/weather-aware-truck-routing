@@ -20,7 +20,7 @@ export default function InputForm({ onSubmit, loading }) {
   };
 
   return (
-    <div className="bg-slate-900 text-white p-6 rounded-xl shadow-xl border border-slate-800">
+    <div className="bg-slate-900 text-white p-4 sm:p-6 rounded-xl shadow-xl border border-slate-800 min-w-0">
       <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-blue-400">
         <Navigation className="w-5 h-5" /> Weather Routing Parameters
       </h2>
@@ -61,7 +61,7 @@ export default function InputForm({ onSubmit, loading }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="text-xs text-slate-400 font-semibold uppercase tracking-wider block mb-1">
               Departure

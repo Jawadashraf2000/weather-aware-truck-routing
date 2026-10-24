@@ -16,7 +16,7 @@ export default function ForecastSlider({ hourOffset, onChange }) {
         </button>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 sm:gap-4">
         <input
           type="range"
           min="0"

@@ -28,7 +28,7 @@ export default function RouteCard({ route, isSelected, onSelect }) {
           : 'bg-slate-900 border-slate-800 hover:border-slate-700'
       }`}
     >
-      <div className="flex justify-between items-start mb-2">
+      <div className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-start mb-2">
         <div className="flex items-center gap-2">
           <span className="font-bold text-slate-100">{route.name}</span>
           {route.is_recommended && (
@@ -46,7 +46,7 @@ export default function RouteCard({ route, isSelected, onSelect }) {
         </span>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 mt-3 text-xs text-slate-400">
+      <div className="grid grid-cols-1 min-[420px]:grid-cols-3 gap-2 mt-3 text-xs text-slate-400">
         <div className="flex items-center gap-1">
           <Route className="w-3.5 h-3.5 text-slate-500" />
           <span>{route.total_distance_miles} miles</span>
