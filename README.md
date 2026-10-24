@@ -82,6 +82,24 @@ npm run build
 
 The production frontend bundle is written to `frontend/dist`.
 
-## Deployment note
+## Deployment
 
-Configure frontend API requests for the public backend URL before deploying. Django production settings should set `SECRET_KEY`, `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`, and `DEBUG=False` through environment configuration.
+Deploy `backend` as a Django web service and `frontend` as a Vite static app.
+
+Backend environment variables:
+
+```text
+DJANGO_SECRET_KEY=<generated secret>
+DJANGO_DEBUG=False
+DJANGO_ALLOWED_HOSTS=<backend host without protocol>
+CORS_ALLOWED_ORIGINS=<frontend URL>
+```
+
+Backend build and start commands:
+
+```text
+pip install -r requirements.txt && python manage.py collectstatic --noinput
+gunicorn routing_project.wsgi:application
+```
+
+Set the frontend `VITE_API_BASE_URL` environment variable to the public backend origin, without `/api`, then build with `npm run build`. Vercel should use `frontend` as the root directory.
