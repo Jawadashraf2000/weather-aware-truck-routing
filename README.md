@@ -103,3 +103,12 @@ gunicorn routing_project.wsgi:application
 ```
 
 Set the frontend `VITE_API_BASE_URL` environment variable to the public backend origin, without `/api`, then build with `npm run build`. Vercel should use `frontend` as the root directory.
+
+## Live deployment
+
+- Application: https://project-dljk0.vercel.app
+- Source: https://github.com/Jawadashraf2000/weather-aware-truck-routing
+
+## Loom walkthrough
+
+Use [LOOM-WALKTHROUGH.md](LOOM-WALKTHROUGH.md) for the 5–7 minute demo script. Add the final Loom URL here after recording.
