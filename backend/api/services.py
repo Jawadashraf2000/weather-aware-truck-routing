@@ -232,7 +232,8 @@ class RouteAnalysisService:
                 ))
             checkpoints_data = []
 
-            severe_no_travel_count = 0
+            severe_count = 0
+            no_travel_count = 0
             high_count = 0
             total_risk_score = 0
 
@@ -242,8 +243,10 @@ class RouteAnalysisService:
                 risk_score = weather["risk_score"]
                 risk_label = weather["risk_label"]
 
-                if risk_score >= 3:
-                    severe_no_travel_count += 1
+                if risk_score == 4:
+                    no_travel_count += 1
+                elif risk_score == 3:
+                    severe_count += 1
                 elif risk_score == 2:
                     high_count += 1
 
@@ -269,7 +272,8 @@ class RouteAnalysisService:
                 "geometry": coords,
                 "checkpoints": checkpoints_data,
                 "metrics": {
-                    "severe_miles": severe_no_travel_count * sample_interval_miles,
+                    "severe_miles": severe_count * sample_interval_miles,
+                    "no_travel_miles": no_travel_count * sample_interval_miles,
                     "high_miles": high_count * sample_interval_miles,
                     "avg_risk": round(avg_risk, 2)
                 }

@@ -11,6 +11,7 @@ const RISK_COLOR_MAP = {
 
 export default function RouteCard({ route, isSelected, onSelect }) {
   const getOverallRiskLabel = () => {
+    if (route.metrics.no_travel_miles > 0) return 'No Travel';
     if (route.metrics.severe_miles > 0) return 'Severe';
     if (route.metrics.high_miles > 0) return 'High';
     if (route.metrics.avg_risk > 1) return 'Moderate';
@@ -57,7 +58,11 @@ export default function RouteCard({ route, isSelected, onSelect }) {
         </div>
         <div className="flex items-center gap-1">
           <ShieldAlert className="w-3.5 h-3.5 text-slate-500" />
-          <span>{route.metrics.severe_miles} severe mi</span>
+          <span>
+            {route.metrics.no_travel_miles > 0
+              ? `${route.metrics.no_travel_miles} no-travel mi`
+              : `${route.metrics.severe_miles} severe mi`}
+          </span>
         </div>
       </div>
     </div>
