@@ -97,17 +97,33 @@ class RouteAnalysisService:
         return checkpoints
 
     @classmethod
-    def fetch_weather_for_checkpoint(cls, lat, lon, arrival_dt, load_weight_lbs):
+    def fetch_weather_for_checkpoints(cls, checkpoints, arrival_times, load_weight_lbs):
+        if not checkpoints:
+            return []
+
+        latitude = ",".join(str(checkpoint["lat"]) for checkpoint in checkpoints)
+        longitude = ",".join(str(checkpoint["lon"]) for checkpoint in checkpoints)
         url = (
             f"https://api.open-meteo.com/v1/forecast?"
-            f"latitude={lat}&longitude={lon}"
+            f"latitude={latitude}&longitude={longitude}"
             f"&hourly=temperature_2m,rain,snowfall,wind_speed_10m"
             f"&wind_speed_unit=mph&forecast_days=3&timezone=UTC"
         )
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, timeout=30)
         data = response.json()
+        if not isinstance(data, list):
+            data = [data]
 
-        hourly = data.get("hourly", {})
+        return [
+            cls._weather_for_checkpoint(
+                location_data, arrival_times[index], load_weight_lbs
+            )
+            for index, location_data in enumerate(data)
+        ]
+
+    @classmethod
+    def _weather_for_checkpoint(cls, location_data, arrival_dt, load_weight_lbs):
+        hourly = location_data.get("hourly", {})
         times = hourly.get("time", [])
         if not times:
             raise ValueError("Failed to retrieve weather forecast.")
@@ -203,17 +219,26 @@ class RouteAnalysisService:
             distance_meters = route["distance"]
 
             sampled_cps = cls.sample_checkpoints(coords, duration_sec, sample_interval_miles)
+            arrival_times = [
+                departure_dt + timedelta(seconds=cp["elapsed_seconds"])
+                for cp in sampled_cps
+            ]
+            checkpoint_weather = []
+            for offset in range(0, len(sampled_cps), 100):
+                checkpoint_weather.extend(cls.fetch_weather_for_checkpoints(
+                    sampled_cps[offset:offset + 100],
+                    arrival_times[offset:offset + 100],
+                    load_weight_lbs,
+                ))
             checkpoints_data = []
 
             severe_no_travel_count = 0
             high_count = 0
             total_risk_score = 0
 
-            for cp in sampled_cps:
-                eta = departure_dt + timedelta(seconds=cp["elapsed_seconds"])
-                weather = cls.fetch_weather_for_checkpoint(
-                    cp["lat"], cp["lon"], eta, load_weight_lbs
-                )
+            for index, cp in enumerate(sampled_cps):
+                eta = arrival_times[index]
+                weather = checkpoint_weather[index]
                 risk_score = weather["risk_score"]
                 risk_label = weather["risk_label"]
 
