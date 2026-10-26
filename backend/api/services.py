@@ -65,7 +65,7 @@ class RouteAnalysisService:
             f"https://api.open-meteo.com/v1/forecast?"
             f"latitude={latitude}&longitude={longitude}"
             f"&hourly=temperature_2m,rain,snowfall,wind_speed_10m"
-            f"&wind_speed_unit=mph&forecast_days=3&timezone=UTC"
+            f"&wind_speed_unit=mph&forecast_days=16&timezone=UTC"
         )
         response = requests.get(url, timeout=30)
         data = response.json()

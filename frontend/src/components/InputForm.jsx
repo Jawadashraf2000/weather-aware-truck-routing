@@ -1,11 +1,23 @@
 import React, { useState } from 'react';
 import { MapPin, Calendar, Weight, Sliders, Navigation } from 'lucide-react';
 
+const toDateTimeLocal = (date) => {
+  const offset = date.getTimezoneOffset() * 60_000;
+  return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+};
+
+const departureBounds = (() => {
+  const now = new Date();
+  const latest = new Date(now);
+  latest.setDate(latest.getDate() + 14);
+  return { min: toDateTimeLocal(now), max: toDateTimeLocal(latest) };
+})();
+
 export default function InputForm({ onSubmit, loading }) {
   const [formData, setFormData] = useState({
     origin: 'Chicago, IL',
     destination: 'Denver, CO',
-    departureTime: new Date().toISOString().slice(0, 16),
+    departureTime: departureBounds.min,
     loadWeight: 35000,
     sampleInterval: 25
   });
@@ -72,6 +84,8 @@ export default function InputForm({ onSubmit, loading }) {
                 type="datetime-local"
                 name="departureTime"
                 value={formData.departureTime}
+                min={departureBounds.min}
+                max={departureBounds.max}
                 onChange={handleChange}
                 required
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-2 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
