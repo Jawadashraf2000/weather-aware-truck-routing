@@ -17,20 +17,6 @@ class RouteAnalysisService:
     @staticmethod
     def get_osrm_routes(origin_coords, dest_coords):
         # OSRM public API format: lon,lat;lon,lat
-        def request_route(waypoints):
-            coordinate_list = ";".join(
-                f"{lon},{lat}" for lat, lon in waypoints
-            )
-            url = (
-                f"http://router.project-osrm.org/route/v1/driving/{coordinate_list}"
-                "?overview=full&geometries=geojson"
-            )
-            response = requests.get(url, timeout=10)
-            data = response.json()
-            if data.get("code") == "Ok" and data.get("routes"):
-                return data["routes"][0]
-            return None
-
         url = (
             f"http://router.project-osrm.org/route/v1/driving/"
             f"{origin_coords[1]},{origin_coords[0]};{dest_coords[1]},{dest_coords[0]}"
@@ -41,35 +27,7 @@ class RouteAnalysisService:
         if data.get("code") != "Ok" or not data.get("routes"):
             raise ValueError("Failed to retrieve route directions.")
 
-        routes = data["routes"][:3]
-        if len(routes) >= 3:
-            return routes
-
-        primary = routes[0]
-        primary_coords = primary["geometry"]["coordinates"]
-        midpoint_index = len(primary_coords) // 2
-        midpoint_lon, midpoint_lat = primary_coords[midpoint_index]
-
-        candidate_routes = []
-        for lon_offset, lat_offset in ((-0.8, 0.35), (0.8, -0.35)):
-            detour = request_route([
-                origin_coords,
-                (midpoint_lat + lat_offset, midpoint_lon + lon_offset),
-                dest_coords,
-            ])
-            if detour:
-                candidate_routes.append(detour)
-
-        seen_geometries = {json.dumps(route["geometry"]) for route in routes}
-        for candidate in candidate_routes:
-            signature = json.dumps(candidate["geometry"])
-            if signature not in seen_geometries:
-                routes.append(candidate)
-                seen_geometries.add(signature)
-            if len(routes) == 3:
-                break
-
-        return routes
+        return data["routes"][:3]
 
     @staticmethod
     def sample_checkpoints(coordinates, total_duration_sec, interval_miles=25):

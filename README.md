@@ -5,7 +5,7 @@ A React and Django application that compares three truck routes using arrival-ti
 ## Features
 
 - Origin, destination, departure date/time, load weight, and checkpoint interval inputs
-- Three OSRM route alternatives, with provider-backed detours when OSRM returns fewer alternatives
+- Genuine OSRM route alternatives; the app displays all available alternatives rather than inventing detours
 - Arrival-time checkpoint weather from Open-Meteo
 - 0–48 hour forecast heatmap for the selected route
 - Low, Moderate, High, Severe, and No Travel risk levels

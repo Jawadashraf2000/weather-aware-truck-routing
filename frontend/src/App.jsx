@@ -59,7 +59,7 @@ export default function App() {
           {routes.length > 0 && (
             <div className="space-y-3">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 px-1">
-                Route Options & Risk Ranking
+                {routes.length === 1 ? 'Legitimate Route & Risk Ranking' : 'Route Options & Risk Ranking'}
               </h3>
               {routes.map((route) => (
                 <RouteCard
