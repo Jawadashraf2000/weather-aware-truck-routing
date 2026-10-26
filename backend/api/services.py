@@ -1,9 +1,9 @@
 import math
 import json
+from bisect import bisect_right
 from datetime import datetime, timedelta
 import requests
 from geopy.geocoders import Nominatim
-from shapely.geometry import LineString
 
 class RouteAnalysisService:
     @staticmethod
@@ -30,25 +30,70 @@ class RouteAnalysisService:
         return data["routes"][:3]
 
     @staticmethod
-    def sample_checkpoints(coordinates, total_duration_sec, interval_miles=25):
-        # LineString works in (lon, lat)
-        line = LineString(coordinates)
+    def sample_checkpoints(
+        coordinates,
+        total_duration_sec,
+        total_distance_meters,
+        interval_miles=25,
+    ):
         interval_meters = interval_miles * 1609.34
-        total_length_meters = line.length * 111000  # Approx conversion degree to meters
+        if interval_meters <= 0 or total_distance_meters <= 0:
+            raise ValueError("Route distance and checkpoint interval must be positive.")
 
-        # Number of samples
-        num_samples = max(2, int(total_length_meters // interval_meters) + 1)
+        cumulative_geometry_meters = [0.0]
+        for (lon1, lat1), (lon2, lat2) in zip(coordinates, coordinates[1:]):
+            lat1, lon1, lat2, lon2 = map(
+                math.radians, (lat1, lon1, lat2, lon2)
+            )
+            delta_lat = lat2 - lat1
+            delta_lon = lon2 - lon1
+            haversine = (
+                math.sin(delta_lat / 2) ** 2
+                + math.cos(lat1) * math.cos(lat2) * math.sin(delta_lon / 2) ** 2
+            )
+            segment_meters = 2 * 6371008.8 * math.asin(math.sqrt(min(1, haversine)))
+            cumulative_geometry_meters.append(
+                cumulative_geometry_meters[-1] + segment_meters
+            )
+
+        geometry_length_meters = cumulative_geometry_meters[-1]
+        if geometry_length_meters <= 0:
+            raise ValueError("Route geometry must contain at least two distinct points.")
+
+        route_distance_miles = total_distance_meters / 1609.34
+        num_samples = max(2, math.ceil(total_distance_meters / interval_meters) + 1)
         checkpoints = []
 
         for i in range(num_samples):
             fraction = i / (num_samples - 1)
-            point = line.interpolate(fraction, normalized=True)
+            if i == num_samples - 1:
+                lon, lat = coordinates[-1]
+            else:
+                target_geometry_meters = geometry_length_meters * fraction
+                segment_index = min(
+                    bisect_right(cumulative_geometry_meters, target_geometry_meters) - 1,
+                    len(coordinates) - 2,
+                )
+                segment_start = cumulative_geometry_meters[segment_index]
+                segment_length = (
+                    cumulative_geometry_meters[segment_index + 1] - segment_start
+                )
+                segment_fraction = (
+                    (target_geometry_meters - segment_start) / segment_length
+                    if segment_length > 0
+                    else 0
+                )
+                lon1, lat1 = coordinates[segment_index]
+                lon2, lat2 = coordinates[segment_index + 1]
+                lon = lon1 + (lon2 - lon1) * segment_fraction
+                lat = lat1 + (lat2 - lat1) * segment_fraction
+
             elapsed_seconds = total_duration_sec * fraction
 
             checkpoints.append({
-                "lat": round(point.y, 5),
-                "lon": round(point.x, 5),
-                "distance_miles": round((fraction * total_length_meters) / 1609.34, 1),
+                "lat": round(lat, 5),
+                "lon": round(lon, 5),
+                "distance_miles": round(fraction * route_distance_miles, 1),
                 "elapsed_seconds": elapsed_seconds
             })
 
@@ -178,7 +223,12 @@ class RouteAnalysisService:
             duration_sec = route["duration"]
             distance_meters = route["distance"]
 
-            sampled_cps = cls.sample_checkpoints(coords, duration_sec, sample_interval_miles)
+            sampled_cps = cls.sample_checkpoints(
+                coords,
+                duration_sec,
+                distance_meters,
+                sample_interval_miles,
+            )
             arrival_times = [
                 departure_dt + timedelta(seconds=cp["elapsed_seconds"])
                 for cp in sampled_cps

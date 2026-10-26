@@ -59,6 +59,8 @@ Open `http://localhost:5173`. The frontend expects the Django API at `http://127
 
 The response contains route geometry, total distance and duration, checkpoints, weather forecasts from the route start through 48 hours, checkpoint risk, route metrics, and a recommended route.
 
+Checkpoint mileage follows the route geometry and is scaled to the route's OSRM distance, so the final checkpoint matches the displayed route total.
+
 ## Risk rules
 
 | Condition | Low | Moderate | High | Severe | No Travel |
