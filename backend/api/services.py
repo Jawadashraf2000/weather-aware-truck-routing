@@ -106,7 +106,9 @@ class RouteAnalysisService:
             try:
                 return times.index(target_iso)
             except ValueError:
-                return 0
+                raise ValueError(
+                    f"Weather forecast does not cover {target_dt.isoformat()}"
+                )
 
         arrival_index = index_for(arrival_dt)
         forecast = []
